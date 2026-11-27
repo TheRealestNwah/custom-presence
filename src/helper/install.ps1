@@ -36,7 +36,8 @@ $manifest = [ordered]@{
   allowed_extensions = @("custom-presence@therealestnwah")
 }
 $manifestPath = Join-Path $dest "$name.json"
-$manifest | ConvertTo-Json | Set-Content -Path $manifestPath -Encoding utf8
+# Windows PowerShell's "-Encoding utf8" adds a byte-order mark, which the browser's JSON reader rejects.
+[IO.File]::WriteAllText($manifestPath, ($manifest | ConvertTo-Json), (New-Object Text.UTF8Encoding $false))
 
 foreach ($k in $keys) {
   New-Item -Path $k -Force | Out-Null

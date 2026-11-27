@@ -1,0 +1,30 @@
+{
+  "name": "custom-presence",
+  "version": "0.1.0",
+  "private": true,
+  "description": "BetterDiscord plugin that shows any program as a game, plus YouTube, Twitch, Plex and Plexamp presence",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run lint && npm test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.11",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.16.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.74.0",
+    "vitest": "^5.1.2"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}

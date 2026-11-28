@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Custom Presence",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Tells the Custom Presence BetterDiscord plugin what YouTube, YouTube Music and Twitch tabs are playing.",
   "browser_specific_settings": {
     "gecko": { "id": "custom-presence@therealestnwah" }

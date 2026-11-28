@@ -12,10 +12,30 @@ export interface TabInfo {
   channelUrl?: string;
   /** Twitch category / game. */
   category?: string;
-  /** Epoch ms when the video would have started if played straight through, rounded to the second. */
+  /**
+   * Epoch ms when the video would have started if played straight through, rounded to the second.
+   * For a Twitch live stream (no durationMs): when the stream went live.
+   */
   startedAt?: number;
   /** Video length in ms, rounded to the second. Absent for live streams and ads. */
   durationMs?: number;
+}
+
+/** Twitch's uptime counter ("9:33:00", "12:05") in ms, or undefined if it doesn't look like one. */
+export function parseUptime(text: string | undefined): number | undefined {
+  const m = /^(?:(\d+):)?(\d{1,2}):(\d{2})$/.exec(text?.trim() ?? "");
+  if (!m) return undefined;
+  const [, h = "0", min, s] = m;
+  return ((Number(h) * 60 + Number(min)) * 60 + Number(s)) * 1000;
+}
+
+const MAX_STREAM_MS = 7 * 24 * 60 * 60 * 1000;
+
+/** When a live stream went live, if the tab reported a plausible time. */
+function liveStart(info: TabInfo, now: number): Pick<Playback, "startedAt"> {
+  const { startedAt } = info;
+  if (typeof startedAt !== "number" || !Number.isFinite(startedAt) || startedAt > now + 60_000 || now - startedAt > MAX_STREAM_MS) return {};
+  return { startedAt };
 }
 
 /** Progress fields copied onto a Playback, only when both make sense. */
@@ -53,7 +73,7 @@ function sameSiteLink(href: string | undefined, hosts: string[]): string | undef
 const stripSuffix = (title: string | undefined, suffix: RegExp) => title?.replace(suffix, "").trim() || undefined;
 
 /** Turn a tab's state into a Playback, or null if the tab isn't something we show. */
-export function parseTab(info: TabInfo): Playback | null {
+export function parseTab(info: TabInfo, now = Date.now()): Playback | null {
   let u: URL;
   try {
     u = new URL(info.url);
@@ -121,6 +141,7 @@ export function parseTab(info: TabInfo): Playback | null {
       extra: info.category,
       url: `https://www.twitch.tv/${first}`,
       imageUrl: `https://static-cdn.jtvnw.net/previews-ttv/live_user_${first}-640x360.jpg`,
+      ...liveStart(info, now),
     };
   }
 

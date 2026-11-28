@@ -209,7 +209,7 @@ export function computeActivities(input: ComputeInput, clock: ActivityClock): De
     const ownChannel = p.integration === "youtube" && settings.youtubeOwnChannel;
     const start = ownChannel
       ? clock.startFor(slot, OWN_CHANNEL_KEY, now)
-      : p.startedAt !== undefined && p.durationMs
+      : p.startedAt !== undefined
         ? clock.steady(slot, p.startedAt)
         : clock.startFor(slot, p.key, now);
     out.push(playbackActivity(p, settings, start, youtubeChannel));

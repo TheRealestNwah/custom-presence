@@ -1,7 +1,7 @@
 // Runs in YouTube, YouTube Music and Twitch tabs. Reads what's playing from the page and
 // tells the background script whenever it changes (and every few seconds as a heartbeat).
 
-import type { TabInfo } from "../core/browser";
+import { parseUptime, type TabInfo } from "../core/browser";
 
 const HEARTBEAT_MS = 5000;
 const MAX_DURATION_S = 12 * 60 * 60; // longer than this is a live stream's buffer, not a video
@@ -88,6 +88,9 @@ function read(): TabInfo {
     info.title = text('[data-a-target="stream-title"]') ?? meta("og:description");
     info.channel = text('[data-a-target="stream-info-card-component"] h1') ?? text("h1.tw-title") ?? text('a[data-a-target="user-channel-header-item"] h1');
     info.category = text('[data-a-target="stream-game-link"]');
+    // Twitch shows how long the stream has been live ("9:33:00"); turn that into when it started.
+    const uptime = isLive(host) ? parseUptime(text('.live-time span[aria-hidden="true"]', ".live-time")) : undefined;
+    if (uptime !== undefined) info.startedAt = Math.round((Date.now() - uptime) / 1000) * 1000;
   }
   return info;
 }

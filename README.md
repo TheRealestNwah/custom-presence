@@ -13,7 +13,7 @@ Several activities can show at once. Paused videos and songs disappear straight 
 
 | Feature | Status |
 | --- | --- |
-| YouTube | ✅ Tested and working: video title, channel (including videos with several uploaders), thumbnail, progress bar, clickable title and channel, and "show my channel" mode |
+| YouTube | ✅ Tested and working: video title, channel (including videos with several uploaders), thumbnail, progress bar, clickable title and channel, and "show my channel" mode (with your channel's current name and avatar) |
 | Pause All button | ✅ Tested and working, including right-click to open the settings |
 | Programs as games (Mappings) | Not tested yet |
 | YouTube Music | Not tested yet |

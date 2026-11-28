@@ -16,7 +16,7 @@ Several activities can show at once. Paused videos and songs disappear straight 
 | YouTube | ✅ Tested and working: video title, channel (including videos with several uploaders), thumbnail, progress bar, clickable title and channel, and "show my channel" mode (with your channel's current name and avatar) |
 | Pause All button | ✅ Tested and working, including right-click to open the settings |
 | Programs as games (Mappings) | Not tested yet |
-| YouTube Music | Not tested yet |
+| YouTube Music | ✅ Tested and working, including while you browse other pages |
 | Twitch | ✅ Tested and working: streamer, category, and time since the stream went live |
 | Plex | Not tested yet |
 | Plexamp | Not tested yet |

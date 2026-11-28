@@ -388,8 +388,8 @@ export function SettingsPanel(props: { plugin: PluginLike }) {
       }),
       h(Field, {
         id: "cp-app-id",
-        name: "Application ID for images",
-        note: "Optional. Create an application at discord.com/developers/applications and paste its ID. Without it, activities not linked to a Known Game have no picture.",
+        name: "Application ID",
+        note: "Optional. Activities use this Discord application (create one at discord.com/developers/applications). Leave it empty unless images stop showing.",
         children: h(Text, { value: s.customAppId, placeholder: "123456789012345678", onChange: (v) => update({ customAppId: v.replace(/\D/g, "") }) }),
       }),
     ),

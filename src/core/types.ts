@@ -16,9 +16,13 @@ export interface DiscordActivity {
   application_id?: string;
   details?: string;
   state?: string;
+  /** Link opened by clicking the details line. */
+  details_url?: string;
+  /** Link opened by clicking the state line. */
+  state_url?: string;
   url?: string;
   timestamps?: { start?: number; end?: number };
-  assets?: { large_image?: string; large_text?: string; small_image?: string; small_text?: string };
+  assets?: { large_image?: string; large_text?: string; large_url?: string; small_image?: string; small_text?: string };
   buttons?: string[];
   metadata?: { button_urls?: string[] };
   /** 0 = show name, 1 = show state, 2 = show details on the profile line. */
@@ -33,6 +37,8 @@ export interface DesiredActivity {
   activity: DiscordActivity;
   /** Public image URL to show as the large image, if any. */
   imageUrl?: string;
+  /** Link opened by clicking the large image. */
+  imageLink?: string;
 }
 
 export interface KnownGameRef {
@@ -67,6 +73,8 @@ export interface Playback {
   title: string;
   /** Channel, streamer, artist... */
   subtitle?: string;
+  /** Page of the channel, streamer or artist. */
+  subtitleUrl?: string;
   /** Category, album... */
   extra?: string;
   url?: string;

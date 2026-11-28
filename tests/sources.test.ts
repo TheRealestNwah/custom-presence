@@ -20,6 +20,13 @@ describe("parseTab", () => {
     expect(parseTab({ url: "https://www.youtube.com/shorts/abc123", playing: true, title: "Short" })?.key).toBe("abc123");
   });
 
+  it("keeps a YouTube channel link only if it stays on YouTube", () => {
+    const base = { url: "https://www.youtube.com/watch?v=abc", playing: true, title: "Video" };
+    expect(parseTab({ ...base, channelUrl: "https://www.youtube.com/@someone" })?.subtitleUrl).toBe("https://www.youtube.com/@someone");
+    expect(parseTab({ ...base, channelUrl: "https://evil.example/@someone" })?.subtitleUrl).toBeUndefined();
+    expect(parseTab({ ...base, channelUrl: "javascript:alert(1)" })?.subtitleUrl).toBeUndefined();
+  });
+
   it("treats music.youtube.com as YouTube Music", () => {
     expect(parseTab({ url: "https://music.youtube.com/watch?v=xyz", playing: false, title: "Track", channel: "Band" })).toMatchObject({
       integration: "youtubeMusic",

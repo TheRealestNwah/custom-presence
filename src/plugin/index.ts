@@ -151,11 +151,11 @@ export default class CustomPresence {
 
   private withImages(desired: DesiredActivity[]): Promise<{ socketId: string; activity: DiscordActivity }[]> {
     return Promise.all(
-      desired.map(async ({ socketId, activity, imageUrl }) => {
+      desired.map(async ({ socketId, activity, imageUrl, imageLink }) => {
         const out = { ...activity };
         if (imageUrl) {
           const key = await resolveImage(out.application_id ?? this.settings.customAppId, imageUrl);
-          if (key) out.assets = { large_image: key, large_text: out.details ?? out.name };
+          if (key) out.assets = { large_image: key, large_text: out.details ?? out.name, ...(imageLink ? { large_url: imageLink } : {}) };
         }
         return { socketId, activity: out };
       }),

@@ -136,6 +136,12 @@ describe("playbackActivity layouts", () => {
     expect("buttons" in a).toBe(false);
   });
 
+  it("YouTube: title opens the video, channel opens the channel, image opens the video", () => {
+    const d = playbackActivity({ ...yt, subtitleUrl: "https://www.youtube.com/@chan" }, s, 0);
+    expect(d.activity).toMatchObject({ details_url: "https://www.youtube.com/watch?v=abc", state_url: "https://www.youtube.com/@chan" });
+    expect(d.imageLink).toBe("https://www.youtube.com/watch?v=abc");
+  });
+
   it("falls back to application id 0 so Discord keeps the activity", () => {
     expect(playbackActivity(yt, s, 0).activity.application_id).toBe("0");
     expect(playbackActivity(yt, settings({ customAppId: "999" }), 0).activity.application_id).toBe("999");

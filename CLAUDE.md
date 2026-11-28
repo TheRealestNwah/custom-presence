@@ -22,7 +22,7 @@ BetterDiscord plugin that shows any program as a Discord activity, plus YouTube,
 - The repo is `"type": "module"`, so the helper is built as `helper.cjs`. Don't rename it to `.js`.
 - The plugin bundle is CommonJS with a `module.exports = module.exports.default` footer; BetterDiscord needs that and the `/** @name ... */` banner.
 - BetterDiscord has no Node access: no `child_process`/`net`. Use `BdApi.Net.fetch` (no CORS) for HTTP, including localhost.
-- Activities are set with `LOCAL_ACTIVITY_UPDATE` per socket id (`custom-presence:*`). Images need a real application id, so `customAppId` exists; a URL becomes an asset via `fetchAssetIds`.
+- Activities are set with `LOCAL_ACTIVITY_UPDATE` per socket id (`custom-presence:*`). Discord drops an activity with no application id, so it falls back to `"0"` (or `customAppId`); a URL becomes an asset via `fetchAssetIds`, which works with `"0"` too. `details_url`, `state_url` and `assets.large_url` make the lines and image clickable.
 - Discord internals (store names, the user panel selector in `pauseButton.ts`, `fetchAssetIds`) can change with Discord updates. When something breaks after an update, look there first.
 - Program detection uses Discord's Registered Games (`RunningGameStore`), not process scanning.
 - The extension id `custom-presence@therealestnwah` must match `allowed_extensions` in `install.ps1`, and the host name `custom_presence_helper` must match in `background.ts` and `install.ps1`.

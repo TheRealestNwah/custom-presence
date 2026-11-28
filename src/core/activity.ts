@@ -94,17 +94,17 @@ export function playbackActivity(p: Playback, settings: Settings, start: number)
   switch (p.integration) {
     case "youtube":
       activity = withButton(
-        { ...base, name: "YouTube", type: ActivityType.Watching, details: p.title, state: p.subtitle },
+        { ...base, name: "YouTube", type: ActivityType.Watching, details: p.title, details_url: p.url, state: p.subtitle, state_url: p.subtitleUrl },
         "Watch",
         p.url,
       );
       break;
     case "youtubeMusic":
-      activity = { ...base, name: "YouTube Music", type: ActivityType.Listening, details: p.title, state: p.subtitle };
+      activity = { ...base, name: "YouTube Music", type: ActivityType.Listening, details: p.title, details_url: p.url, state: p.subtitle, state_url: p.subtitleUrl };
       break;
     case "twitch":
       activity = withButton(
-        { ...base, name: "Twitch", type: ActivityType.Watching, details: p.subtitle ?? p.title, state: p.extra },
+        { ...base, name: "Twitch", type: ActivityType.Watching, details: p.subtitle ?? p.title, details_url: p.url, state: p.extra },
         "Watch stream",
         p.url,
       );
@@ -135,6 +135,7 @@ export function playbackActivity(p: Playback, settings: Settings, start: number)
     socketId: `${SOCKET_PREFIX}:${p.integration}`,
     activity: clean(activity),
     imageUrl: p.imageUrl,
+    imageLink: p.url,
   };
 }
 

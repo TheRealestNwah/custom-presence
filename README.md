@@ -17,7 +17,7 @@ Several activities can show at once. Paused videos and songs disappear straight 
 | Pause All button | ✅ Tested and working |
 | Programs as games (Mappings) | Not tested yet |
 | YouTube Music | Not tested yet |
-| Twitch | ✅ Tested and working |
+| Twitch | ✅ Tested and working: streamer, category, and time since the stream went live |
 | Plex | Not tested yet |
 | Plexamp | Not tested yet |
 | Spotify switch | Not tested yet |

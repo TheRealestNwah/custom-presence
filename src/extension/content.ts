@@ -36,10 +36,12 @@ const YT_CHANNEL_TEXT = [
   "ytd-watch-metadata ytd-channel-name #text",
   "ytd-watch-metadata ytd-channel-name yt-formatted-string",
   "#owner #channel-name",
+  "ytd-video-owner-renderer #upload-info yt-attributed-string",
 ];
-// For several uploaders, the first avatar or channel link is the main channel.
+// Several uploaders: their names open a dialog, not a link, so use the description's channel card.
 const YT_CHANNEL_HREF = [
   ...YT_CHANNEL_LINKS,
+  "ytd-video-description-infocards-section-renderer a#header[href]",
   "ytd-watch-metadata #owner a[href^='/@']",
   "ytd-watch-metadata #owner a[href^='/channel/']",
   "#owner a[href^='/@']",
@@ -73,7 +75,8 @@ function read(): TabInfo {
   } else if (host.endsWith("youtube.com")) {
     // The tab title is always just the video title; the page heading can hold hidden alternates.
     info.title = document.title || text("ytd-watch-metadata h1 yt-formatted-string", "h1.title");
-    info.channel = text(...YT_CHANNEL_TEXT)?.split("\n")[0]?.trim() || undefined;
+    // "Marques Brownlee\n and The Studio" → "Marques Brownlee and The Studio"
+    info.channel = text(...YT_CHANNEL_TEXT)?.replace(/\s+/g, " ").trim() || undefined;
     info.channelUrl = link(...YT_CHANNEL_HREF);
   } else if (host.endsWith("twitch.tv")) {
     info.title = text('[data-a-target="stream-title"]') ?? meta("og:description");

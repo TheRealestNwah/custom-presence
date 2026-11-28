@@ -219,6 +219,14 @@ describe("normalizeSettings", () => {
     expect(s.mappings).toEqual([]);
   });
 
+  it("drops malformed Mappings and an invalid helper port", () => {
+    const s = normalizeSettings({ helperPort: -1, mappings: [prism, { id: "x" }, null, { ...prism, type: "Sleeping" }] }, () => "new");
+    expect(s.mappings).toEqual([prism]);
+    expect(s.helperPort).toBe(47823);
+    expect(normalizeSettings({ helperPort: 1.5 }, () => "").helperPort).toBe(47823);
+    expect(normalizeSettings({ helperPort: 5000 }, () => "").helperPort).toBe(5000);
+  });
+
   it("keeps an existing Plex client id", () => {
     expect(normalizeSettings({ plex: { clientId: "keep" } }, () => "new").plex.clientId).toBe("keep");
   });

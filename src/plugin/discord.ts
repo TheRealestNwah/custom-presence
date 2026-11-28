@@ -1,5 +1,5 @@
 // Everything that touches Discord's internals lives here, so breakage after a Discord update is in one place.
-import type { DiscordActivity, RunningGame } from "../core/types";
+import type { DiscordActivity, LinkedChannel, RunningGame } from "../core/types";
 import type { DetectableApp } from "../core/knownGames";
 
 export const PLUGIN = "CustomPresence";
@@ -65,6 +65,16 @@ export function getGamesSeen(): RunningGame[] {
     if (exe && !seen.has(exe)) seen.set(exe, { exeName: exe, name: g.name });
   }
   return [...seen.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export const connectedAccountsStore = () => BdApi.Webpack.getStore("ConnectedAccountsStore");
+
+/** The YouTube channel linked in the user's Discord Connections, if any. */
+export function getLinkedYouTubeChannel(): LinkedChannel | undefined {
+  const accounts = (connectedAccountsStore()?.getAccounts?.() ?? []) as { type?: string; id?: string; name?: string }[];
+  const yt = accounts.find((a) => a.type === "youtube" && a.id);
+  if (!yt?.id) return undefined;
+  return { name: yt.name || "My channel", url: `https://www.youtube.com/channel/${encodeURIComponent(yt.id)}` };
 }
 
 interface AssetUtils {

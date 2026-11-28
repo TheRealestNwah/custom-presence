@@ -142,6 +142,48 @@ describe("playbackActivity layouts", () => {
     expect(d.imageLink).toBe("https://www.youtube.com/watch?v=abc");
   });
 
+  it("Own Channel: shows the linked channel, never the video", () => {
+    const channel = { name: "Me", url: "https://www.youtube.com/channel/UC1" };
+    const d = playbackActivity(yt, settings({ youtubeOwnChannel: true }), 0, channel);
+    expect(d.activity).toMatchObject({ name: "YouTube", type: ActivityType.Watching, details: "Me", details_url: channel.url });
+    expect(JSON.stringify(d)).not.toContain(yt.title);
+    expect(JSON.stringify(d)).not.toContain("watch?v=");
+    expect(d.imageLink).toBe(channel.url);
+  });
+
+  it("Own Channel without a linked account still hides the video", () => {
+    const d = playbackActivity(yt, settings({ youtubeOwnChannel: true }), 0);
+    expect(d.activity).toMatchObject({ name: "YouTube" });
+    expect("details" in d.activity).toBe(false);
+  });
+
+  it("Own Channel keeps one clock across videos", () => {
+    const clock = new ActivityClock();
+    const run = (key: string, now: number) =>
+      computeActivities({ settings: settings({ youtubeOwnChannel: true }), runningGames: [], playbacks: [{ ...yt, key }], now }, clock)[0]!.activity.timestamps?.start;
+    expect(run("a", 100)).toBe(100);
+    expect(run("b", 200)).toBe(100);
+  });
+
+  it("shows a progress bar when the length is known", () => {
+    const d = playbackActivity({ ...yt, startedAt: 1000, durationMs: 60000 }, s, 1000);
+    expect(d.activity.timestamps).toEqual({ start: 1000, end: 61000 });
+  });
+
+  it("progress: ignores rounding jitter but follows a seek", () => {
+    const clock = new ActivityClock();
+    const run = (startedAt: number) =>
+      computeActivities({ settings: s, runningGames: [], playbacks: [{ ...yt, startedAt, durationMs: 60000 }], now: 0 }, clock)[0]!.activity.timestamps;
+    expect(run(10000)).toEqual({ start: 10000, end: 70000 });
+    expect(run(11000)).toEqual({ start: 10000, end: 70000 });
+    expect(run(40000)).toEqual({ start: 40000, end: 100000 });
+  });
+
+  it("Own Channel shows no progress bar", () => {
+    const d = playbackActivity({ ...yt, startedAt: 1000, durationMs: 60000 }, settings({ youtubeOwnChannel: true }), 5);
+    expect(d.activity.timestamps).toEqual({ start: 5 });
+  });
+
   it("falls back to application id 0 so Discord keeps the activity", () => {
     expect(playbackActivity(yt, s, 0).activity.application_id).toBe("0");
     expect(playbackActivity(yt, settings({ customAppId: "999" }), 0).activity.application_id).toBe("999");

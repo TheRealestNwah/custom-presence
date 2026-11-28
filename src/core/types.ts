@@ -79,12 +79,22 @@ export interface Playback {
   extra?: string;
   url?: string;
   imageUrl?: string;
+  /** When playback would have started had it run without pausing or seeking (epoch ms). With durationMs, shows a progress bar. */
+  startedAt?: number;
+  /** Length of the item, if it has one (live streams don't). */
+  durationMs?: number;
   /** Plex only: show or movie name. */
   showTitle?: string;
   season?: number;
   episode?: number;
   /** Plex only: name of the Plex app that played it. */
   appName?: string;
+}
+
+/** The user's own channel on a service, from their Discord Connections. */
+export interface LinkedChannel {
+  name: string;
+  url: string;
 }
 
 /** A program Discord's game detection currently sees running. */

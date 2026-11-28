@@ -15,6 +15,8 @@ export interface Settings {
   paused: boolean;
   /** Show the title instead of the app name on the one-line profile status. */
   titleOnProfileLine: boolean;
+  /** YouTube shows the user's Own Channel instead of the video being watched. */
+  youtubeOwnChannel: boolean;
   /** Discord application id used for images on activities not linked to a Known Game. */
   customAppId: string;
   helperPort: number;
@@ -29,6 +31,7 @@ export function defaultSettings(makeId: () => string): Settings {
   return {
     paused: false,
     titleOnProfileLine: false,
+    youtubeOwnChannel: false,
     customAppId: "",
     helperPort: DEFAULT_HELPER_PORT,
     integrations: { youtube: true, youtubeMusic: true, twitch: true, plex: true, plexamp: true, spotify: true },
@@ -45,6 +48,7 @@ export function normalizeSettings(stored: unknown, makeId: () => string): Settin
   return {
     paused: typeof s.paused === "boolean" ? s.paused : base.paused,
     titleOnProfileLine: typeof s.titleOnProfileLine === "boolean" ? s.titleOnProfileLine : base.titleOnProfileLine,
+    youtubeOwnChannel: typeof s.youtubeOwnChannel === "boolean" ? s.youtubeOwnChannel : base.youtubeOwnChannel,
     customAppId: typeof s.customAppId === "string" ? s.customAppId : base.customAppId,
     helperPort: typeof s.helperPort === "number" ? s.helperPort : base.helperPort,
     integrations: { ...base.integrations, ...(s.integrations ?? {}) },

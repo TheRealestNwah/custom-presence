@@ -3,12 +3,15 @@ import {
   ActivityType,
   type DesiredActivity,
   type DiscordActivity,
+  type LinkedChannel,
   type Mapping,
   type Playback,
   type RunningGame,
 } from "./types";
 
 export const SOCKET_PREFIX = "custom-presence";
+
+const STEADY = "\u0000steady";
 
 /** Remembers when each slot's current item started, so elapsed time survives re-renders. */
 export class ActivityClock {
@@ -19,6 +22,17 @@ export class ActivityClock {
     if (prev && prev.key === key) return prev.start;
     this.starts.set(slot, { key, start: now });
     return now;
+  }
+
+  /**
+   * A start time reported by the source (for a progress bar). Small jitter is ignored so Discord
+   * isn't updated every poll; a seek moves it.
+   */
+  steady(slot: string, start: number, toleranceMs = 2000): number {
+    const prev = this.starts.get(slot);
+    if (prev && prev.key === STEADY && Math.abs(prev.start - start) <= toleranceMs) return prev.start;
+    this.starts.set(slot, { key: STEADY, start });
+    return start;
   }
 
   /** Forget slots that are no longer shown. */
@@ -33,6 +47,8 @@ export interface ComputeInput {
   runningGames: RunningGame[];
   playbacks: Playback[];
   now: number;
+  /** The user's YouTube channel from their Discord Connections, if linked. */
+  youtubeChannel?: LinkedChannel;
 }
 
 /**
@@ -87,8 +103,26 @@ function withButton(activity: DiscordActivity, label: string, url?: string): Dis
 
 const pad = (n: number) => String(n);
 
+/** Stays the same for every video, so Own Channel mode keeps one image and one running clock. */
+export const YOUTUBE_LOGO = "https://www.youtube.com/img/desktop/yt_1200.png";
+const OWN_CHANNEL_KEY = "own-channel";
+
+/** Own Channel mode: say "Watching YouTube" and show the user's channel, never the video. */
+function ownChannelActivity(settings: Settings, start: number, channel: LinkedChannel | undefined): DesiredActivity {
+  const activity: DiscordActivity = clean({
+    name: "YouTube",
+    type: ActivityType.Watching,
+    application_id: appId(settings),
+    timestamps: { start },
+    details: channel?.name,
+    details_url: channel?.url,
+  });
+  return { socketId: `${SOCKET_PREFIX}:youtube`, activity, imageUrl: YOUTUBE_LOGO, imageLink: channel?.url };
+}
+
 /** Build the Activity an Integration shows for one Playback. */
-export function playbackActivity(p: Playback, settings: Settings, start: number): DesiredActivity {
+export function playbackActivity(p: Playback, settings: Settings, start: number, youtubeChannel?: LinkedChannel): DesiredActivity {
+  if (p.integration === "youtube" && settings.youtubeOwnChannel) return ownChannelActivity(settings, start, youtubeChannel);
   const base = { timestamps: { start }, application_id: appId(settings) };
   let activity: DiscordActivity;
   switch (p.integration) {
@@ -130,6 +164,7 @@ export function playbackActivity(p: Playback, settings: Settings, start: number)
       };
       break;
   }
+  if (p.durationMs) activity.timestamps = { start, end: start + p.durationMs };
   if (settings.titleOnProfileLine && activity.details) activity.status_display_type = 2;
   return {
     socketId: `${SOCKET_PREFIX}:${p.integration}`,
@@ -154,7 +189,7 @@ export function sortByPriority<T extends { activity: DiscordActivity }>(list: T[
 
 /** Everything the plugin wants on the profile right now, primary first. */
 export function computeActivities(input: ComputeInput, clock: ActivityClock): DesiredActivity[] {
-  const { settings, runningGames, playbacks, now } = input;
+  const { settings, runningGames, playbacks, now, youtubeChannel } = input;
   if (settings.paused) {
     clock.keepOnly([]);
     return [];
@@ -171,7 +206,13 @@ export function computeActivities(input: ComputeInput, clock: ActivityClock): De
     if (!p.playing || seen.has(p.integration) || !settings.integrations[p.integration]) continue;
     seen.add(p.integration);
     const slot = `${SOCKET_PREFIX}:${p.integration}`;
-    out.push(playbackActivity(p, settings, clock.startFor(slot, p.key, now)));
+    const ownChannel = p.integration === "youtube" && settings.youtubeOwnChannel;
+    const start = ownChannel
+      ? clock.startFor(slot, OWN_CHANNEL_KEY, now)
+      : p.startedAt !== undefined && p.durationMs
+        ? clock.steady(slot, p.startedAt)
+        : clock.startFor(slot, p.key, now);
+    out.push(playbackActivity(p, settings, start, youtubeChannel));
   }
 
   clock.keepOnly(out.map((d) => d.socketId));

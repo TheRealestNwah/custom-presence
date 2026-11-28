@@ -36,7 +36,11 @@ export default class CustomPresence {
   private revision = 0;
   private timers: ReturnType<typeof setInterval>[] = [];
   private cleanups: (() => void)[] = [];
-  private pauseButton = new PauseButton(() => this.settings.paused, () => this.update({ paused: !this.settings.paused }));
+  private pauseButton = new PauseButton(
+    () => this.settings.paused,
+    () => this.update({ paused: !this.settings.paused }),
+    () => this.openSettings(),
+  );
 
   start(): void {
     this.settings = normalizeSettings(BdApi.Data.load(PLUGIN, "settings"), makeId);
@@ -88,6 +92,11 @@ export default class CustomPresence {
 
   getSettingsPanel(): unknown {
     return BdApi.React.createElement(SettingsPanel, { plugin: this });
+  }
+
+  /** Shows the settings panel in a modal, the same panel BetterDiscord opens from the plugin list. */
+  openSettings(): void {
+    BdApi.UI.showConfirmationModal("Custom Presence", this.getSettingsPanel(), { confirmText: "Done", cancelText: null });
   }
 
   update(patch: Partial<Settings>): void {

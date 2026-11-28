@@ -40,7 +40,7 @@ Agreed 2026-11-27. Terms are defined in [GLOSSARY.md](../GLOSSARY.md); the brows
 ## Showing Activities
 
 - All active Activities show at once. Primary Activity order is Playing > Watching > Listening.
-- **Pause All** sits in the channel header toolbar (next to pins and the member list) and in plugin settings.
+- **Pause All** sits in the channel header toolbar (next to pins and the member list) and in plugin settings. Right-clicking the button opens the settings panel in a modal.
 - Updates only when something changes, re-sent after Discord reconnects.
 
 ## Repo conventions

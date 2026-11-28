@@ -103,7 +103,7 @@ function withButton(activity: DiscordActivity, label: string, url?: string): Dis
 
 const pad = (n: number) => String(n);
 
-/** Stays the same for every video, so Own Channel mode keeps one image and one running clock. */
+/** Own Channel mode's image when the channel's avatar isn't known. */
 export const YOUTUBE_LOGO = "https://www.youtube.com/img/desktop/yt_1200.png";
 const OWN_CHANNEL_KEY = "own-channel";
 
@@ -117,7 +117,7 @@ function ownChannelActivity(settings: Settings, start: number, channel: LinkedCh
     details: channel?.name,
     details_url: channel?.url,
   });
-  return { socketId: `${SOCKET_PREFIX}:youtube`, activity, imageUrl: YOUTUBE_LOGO, imageLink: channel?.url };
+  return { socketId: `${SOCKET_PREFIX}:youtube`, activity, imageUrl: channel?.imageUrl ?? YOUTUBE_LOGO, imageLink: channel?.url };
 }
 
 /** Build the Activity an Integration shows for one Playback. */

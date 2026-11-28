@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ActivityClock, computeActivities, filterDiscordActivities, playbackActivity } from "../src/core/activity";
+import { ActivityClock, computeActivities, filterDiscordActivities, playbackActivity, YOUTUBE_LOGO } from "../src/core/activity";
 import { defaultSettings, normalizeSettings, type Settings } from "../src/core/settings";
 import { ActivityType, type Mapping, type Playback } from "../src/core/types";
 
@@ -149,6 +149,13 @@ describe("playbackActivity layouts", () => {
     expect(JSON.stringify(d)).not.toContain(yt.title);
     expect(JSON.stringify(d)).not.toContain("watch?v=");
     expect(d.imageLink).toBe(channel.url);
+  });
+
+  it("Own Channel: uses the channel's avatar when known, else the YouTube logo", () => {
+    const channel = { name: "Me", url: "https://www.youtube.com/channel/UC1" };
+    const s = settings({ youtubeOwnChannel: true });
+    expect(playbackActivity(yt, s, 0, { ...channel, imageUrl: "https://yt3.googleusercontent.com/me" }).imageUrl).toBe("https://yt3.googleusercontent.com/me");
+    expect(playbackActivity(yt, s, 0, channel).imageUrl).toBe(YOUTUBE_LOGO);
   });
 
   it("Own Channel without a linked account still hides the video", () => {

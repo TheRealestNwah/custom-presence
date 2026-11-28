@@ -36,7 +36,7 @@ A built-in source that turns something the user is consuming into an Activity: Y
 _Avoid_: Platform, provider, connector
 
 **Own Channel**:
-The user's own YouTube channel, as linked in their Discord Connections. When switched on, the YouTube Integration shows it instead of the video being watched.
+The user's own YouTube channel, as linked in their Discord Connections. When switched on, the YouTube Integration shows it instead of the video being watched, with the channel's current name and avatar read from its YouTube page (Discord keeps the name from when the account was linked).
 _Avoid_: My channel, linked account
 
 **This PC**:

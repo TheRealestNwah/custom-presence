@@ -10,6 +10,8 @@ export interface TabInfo {
   channel?: string;
   /** Link to the channel or artist page, as found on the page. */
   channelUrl?: string;
+  /** YouTube Music: the player's link to the current song. The tab's URL only has it on the /watch page, not while browsing. */
+  playerUrl?: string;
   /** Twitch category / game. */
   category?: string;
   /**
@@ -59,6 +61,12 @@ function youtubeVideoId(u: URL): string | undefined {
   return m?.[1];
 }
 
+/** The song id from YouTube Music's player link, only if it's a music.youtube.com watch link. */
+function playerVideoId(href: string | undefined): string | undefined {
+  const link = sameSiteLink(href, ["music.youtube.com"]);
+  return link ? youtubeVideoId(new URL(link)) : undefined;
+}
+
 /** Keep a page-supplied link only if it points at the same site, so the activity never links elsewhere. */
 function sameSiteLink(href: string | undefined, hosts: string[]): string | undefined {
   if (!href) return undefined;
@@ -83,7 +91,7 @@ export function parseTab(info: TabInfo, now = Date.now()): Playback | null {
   const host = u.hostname.replace(/^(www|m)\./, "");
 
   if (host === "music.youtube.com") {
-    const id = youtubeVideoId(u);
+    const id = youtubeVideoId(u) ?? playerVideoId(info.playerUrl);
     if (!id || !info.title) return null;
     return {
       integration: "youtubeMusic",

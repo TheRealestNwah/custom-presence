@@ -81,6 +81,17 @@ describe("parseTab", () => {
     expect(parseTab(tab, now)?.startedAt).toBeUndefined();
   });
 
+  it("reads YouTube Music from the player while browsing other pages", () => {
+    const tab = { url: "https://music.youtube.com/explore", playing: true, title: "Song", channel: "Artist" };
+    expect(parseTab({ ...tab, playerUrl: "https://music.youtube.com/watch?v=abc123" })).toMatchObject({
+      integration: "youtubeMusic",
+      key: "abc123",
+      url: "https://music.youtube.com/watch?v=abc123",
+    });
+    expect(parseTab(tab)).toBeNull();
+    expect(parseTab({ ...tab, playerUrl: "https://evil.example/watch?v=abc123" })).toBeNull();
+  });
+
   it("ignores Twitch's own pages", () => {
     expect(parseTab({ url: "https://www.twitch.tv/directory/category/celeste", playing: true })).toBeNull();
   });

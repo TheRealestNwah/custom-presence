@@ -28,6 +28,9 @@ export default class CustomPresence {
   private clock = new ActivityClock();
   private browser: Playback[] = [];
   private plex: Playback[] = [];
+  // Bumped per poll so a slow, older response never overwrites a newer one.
+  private browserSeq = 0;
+  private plexSeq = 0;
   private sent = new Map<string, string>();
   private ours: DiscordActivity[] = [];
   private revision = 0;
@@ -118,7 +121,9 @@ export default class CustomPresence {
   }
 
   private async pollBrowser(): Promise<void> {
+    const seq = ++this.browserSeq;
     const next = this.browserWanted() ? await fetchBrowserPlaybacks(this.settings.helperPort) : [];
+    if (seq !== this.browserSeq) return;
     if (JSON.stringify(next) !== JSON.stringify(this.browser)) {
       this.browser = next;
       this.render();
@@ -126,6 +131,7 @@ export default class CustomPresence {
   }
 
   private async pollPlex(): Promise<void> {
+    const seq = ++this.plexSeq;
     const i = this.settings.integrations;
     let next: Playback[] = [];
     if (!this.settings.paused && (i.plex || i.plexamp)) {
@@ -135,6 +141,7 @@ export default class CustomPresence {
         BdApi.Logger.warn(PLUGIN, "Plex poll failed", e);
       }
     }
+    if (seq !== this.plexSeq) return;
     if (JSON.stringify(next) !== JSON.stringify(this.plex)) {
       this.plex = next;
       this.render();

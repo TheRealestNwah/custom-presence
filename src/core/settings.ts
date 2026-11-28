@@ -1,4 +1,4 @@
-import type { IntegrationId, Mapping } from "./types";
+import { ActivityType, type IntegrationId, type Mapping } from "./types";
 
 export interface PlexSettings {
   /** Random id identifying this plugin install to Plex. */
@@ -40,6 +40,15 @@ export function defaultSettings(makeId: () => string): Settings {
   };
 }
 
+const TYPES = new Set<string>(Object.keys(ActivityType));
+
+/** A stored Mapping is kept only if the fields every render reads have the right shape. */
+function isMapping(m: unknown): m is Mapping {
+  if (!m || typeof m !== "object") return false;
+  const x = m as Partial<Mapping>;
+  return typeof x.id === "string" && typeof x.exeName === "string" && typeof x.name === "string" && typeof x.enabled === "boolean" && TYPES.has(String(x.type));
+}
+
 /** Merge stored (possibly older or partial) settings over the defaults. */
 export function normalizeSettings(stored: unknown, makeId: () => string): Settings {
   const base = defaultSettings(makeId);
@@ -50,9 +59,9 @@ export function normalizeSettings(stored: unknown, makeId: () => string): Settin
     titleOnProfileLine: typeof s.titleOnProfileLine === "boolean" ? s.titleOnProfileLine : base.titleOnProfileLine,
     youtubeOwnChannel: typeof s.youtubeOwnChannel === "boolean" ? s.youtubeOwnChannel : base.youtubeOwnChannel,
     customAppId: typeof s.customAppId === "string" ? s.customAppId : base.customAppId,
-    helperPort: typeof s.helperPort === "number" ? s.helperPort : base.helperPort,
+    helperPort: Number.isInteger(s.helperPort) && s.helperPort! > 0 && s.helperPort! < 65536 ? s.helperPort! : base.helperPort,
     integrations: { ...base.integrations, ...(s.integrations ?? {}) },
-    mappings: Array.isArray(s.mappings) ? s.mappings : [],
+    mappings: Array.isArray(s.mappings) ? s.mappings.filter(isMapping) : [],
     plex: {
       ...base.plex,
       ...(s.plex ?? {}),

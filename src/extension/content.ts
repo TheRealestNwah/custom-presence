@@ -56,13 +56,19 @@ function mainVideo(): HTMLMediaElement | null {
   return all.find((v) => !v.paused && !v.muted) ?? all.find((v) => !v.paused) ?? all[0] ?? null;
 }
 
+/** Live streams report their buffer as a finite duration, which would draw a bogus progress bar. */
+function isLive(host: string): boolean {
+  if (host.endsWith("twitch.tv")) return !/^\/videos\//.test(location.pathname);
+  return !!document.querySelector(".ytp-live, ytd-badge-supported-renderer .badge-style-type-live-now-alternate");
+}
+
 function read(): TabInfo {
   const host = location.hostname;
   const video = mainVideo();
   const playing = !!video && !video.paused && !video.ended && video.readyState > 2;
   const info: TabInfo = { url: location.href, playing };
   const ad = !!document.querySelector(".ad-showing, .ad-interrupting");
-  if (video && !ad && Number.isFinite(video.duration) && video.duration > 0 && video.duration < MAX_DURATION_S) {
+  if (video && !ad && !isLive(host) && Number.isFinite(video.duration) && video.duration > 0 && video.duration < MAX_DURATION_S) {
     // Rounded to the second so the heartbeat doesn't count as a change.
     info.startedAt = Math.round((Date.now() - video.currentTime * 1000) / 1000) * 1000;
     info.durationMs = Math.round(video.duration) * 1000;

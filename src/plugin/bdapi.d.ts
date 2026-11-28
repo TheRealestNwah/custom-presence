@@ -55,6 +55,12 @@ declare const BdApi: {
   };
   UI: {
     showToast(message: string, options?: { type?: "info" | "success" | "warning" | "error" }): void;
+    /** content can be a React element. cancelText: null hides the cancel button. Returns the modal id. */
+    showConfirmationModal(
+      title: string,
+      content: unknown,
+      options?: { confirmText?: string; cancelText?: string | null; onConfirm?: () => void; onCancel?: () => void },
+    ): string;
   };
   Logger: {
     info(pluginName: string, ...args: unknown[]): void;

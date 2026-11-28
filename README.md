@@ -5,7 +5,7 @@ A [BetterDiscord](https://betterdiscord.app) plugin that shows what you're reall
 - **Any program as a game or other activity.** Open Prism Launcher and your profile says *Playing Minecraft*. Link to a game Discord already knows for its real name and icon.
 - **Watching:** YouTube and Twitch (in Waterfox), Plex (desktop app).
 - **Listening:** YouTube Music (in Waterfox), Plexamp, and a switch for Discord's own Spotify activity.
-- **Every integration has its own toggle**, and **Pause All** (in the channel header, next to pins and the member list) hides everything at once.
+- **Every integration has its own toggle**, and **Pause All** (in the channel header, next to pins and the member list) hides everything at once. Right-click it to open the plugin settings.
 
 Several activities can show at once. Paused videos and songs disappear straight away.
 

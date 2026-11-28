@@ -1,4 +1,5 @@
 // The Pause All button in the channel header toolbar, before threads, notifications, pins and members.
+// Click toggles Pause All; right-click opens the plugin settings.
 // Discord's class names are hashed ("toolbar_a1b2c"), so we match on their stable prefix.
 
 const BUTTON_ID = "custom-presence-pause";
@@ -13,6 +14,7 @@ export class PauseButton {
   constructor(
     private isPaused: () => boolean,
     private toggle: () => void,
+    private openSettings: () => void,
   ) {}
 
   inject(): void {
@@ -24,6 +26,11 @@ export class PauseButton {
     btn.type = "button";
     btn.className = "custom-presence-pause";
     btn.addEventListener("click", () => this.toggle());
+    btn.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.openSettings();
+    });
     container.prepend(btn);
     this.refresh();
   }
@@ -34,7 +41,9 @@ export class PauseButton {
     const paused = this.isPaused();
     btn.innerHTML = paused ? ICON_PAUSED : ICON_ON;
     btn.classList.toggle("is-paused", paused);
-    const label = paused ? "Custom Presence paused: click to resume" : "Pause Custom Presence";
+    const label = paused
+      ? "Custom Presence paused: click to resume, right-click for settings"
+      : "Pause Custom Presence (right-click for settings)";
     btn.setAttribute("aria-label", label);
     btn.title = label;
   }

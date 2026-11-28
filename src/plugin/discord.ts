@@ -10,11 +10,23 @@ interface Dispatcher {
   unsubscribe(type: string, fn: (action: unknown) => void): void;
 }
 
+const isDispatcher = (m: unknown): m is Dispatcher =>
+  !!m &&
+  typeof (m as Dispatcher).dispatch === "function" &&
+  typeof (m as Dispatcher).subscribe === "function" &&
+  typeof (m as Dispatcher).unsubscribe === "function";
+
 let dispatcher: Dispatcher | undefined;
 function getDispatcher(): Dispatcher {
-  dispatcher ??= BdApi.Webpack.getByKeys("dispatch", "subscribe", "unsubscribe") as Dispatcher;
-  if (!dispatcher) throw new Error("Couldn't find Discord's dispatcher");
-  return dispatcher;
+  if (dispatcher) return dispatcher;
+  // Every Flux store holds the dispatcher, which survives Discord renaming its exports.
+  for (const name of ["UserStore", "RunningGameStore", "LocalActivityStore", "SelectedChannelStore"]) {
+    const d = (BdApi.Webpack.getStore(name) as { _dispatcher?: unknown } | undefined)?._dispatcher;
+    if (isDispatcher(d)) return (dispatcher = d);
+  }
+  const found = BdApi.Webpack.getModule(isDispatcher, { searchExports: true });
+  if (isDispatcher(found)) return (dispatcher = found);
+  throw new Error("Couldn't find Discord's dispatcher");
 }
 
 /** Show (or with null, clear) one Activity slot on the user's profile. */
@@ -59,6 +71,19 @@ interface AssetUtils {
   fetchAssetIds(applicationId: string, keys: string[]): Promise<string[]>;
 }
 let assetUtils: AssetUtils | undefined | null;
+
+function findAssetUtils(): AssetUtils | null {
+  const byKey = BdApi.Webpack.getModule((m) => typeof m?.fetchAssetIds === "function", { searchExports: false });
+  if (byKey) return byKey as AssetUtils;
+  // Newer builds export it under a mangled name; it's the function that calls the external-assets endpoint.
+  const fn = BdApi.Webpack.getModule(
+    (m) => typeof m === "function" && /external-assets|EXTERNAL_ASSETS/.test(Function.prototype.toString.call(m)),
+    { searchExports: true },
+  );
+  if (typeof fn === "function") return { fetchAssetIds: fn as AssetUtils["fetchAssetIds"] };
+  BdApi.Logger.warn(PLUGIN, "fetchAssetIds not found; custom images won't show");
+  return null;
+}
 const assetCache = new Map<string, string>();
 
 /**
@@ -70,7 +95,7 @@ export async function resolveImage(applicationId: string | undefined, url: strin
   const cacheKey = `${applicationId}|${url}`;
   const cached = assetCache.get(cacheKey);
   if (cached) return cached;
-  if (assetUtils === undefined) assetUtils = (BdApi.Webpack.getByKeys("fetchAssetIds", "getAssetImage") as AssetUtils) ?? null;
+  if (assetUtils === undefined) assetUtils = findAssetUtils();
   if (!assetUtils) return undefined;
   try {
     const [id] = await assetUtils.fetchAssetIds(applicationId, [url]);

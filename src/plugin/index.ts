@@ -37,17 +37,19 @@ export default class CustomPresence {
     this.settings = normalizeSettings(BdApi.Data.load(PLUGIN, "settings"), makeId);
     this.save();
     BdApi.DOM.addStyle(PLUGIN, STYLES);
-    this.patchActivityStore();
+    this.safely("patching the activity list", () => this.patchActivityStore());
 
     const games = runningGameStore();
     const onGames = () => this.render();
     games?.addChangeListener(onGames);
     this.cleanups.push(() => games?.removeChangeListener(onGames));
     // Discord forgets local activities when it reconnects, so send everything again.
-    this.cleanups.push(onConnectionOpen(() => {
-      this.sent.clear();
-      this.render();
-    }));
+    this.safely("listening for reconnects", () =>
+      this.cleanups.push(onConnectionOpen(() => {
+        this.sent.clear();
+        this.render();
+      })),
+    );
 
     this.timers.push(setInterval(() => void this.pollBrowser(), BROWSER_POLL_MS));
     this.timers.push(setInterval(() => void this.pollPlex(), PLEX_POLL_MS));
@@ -89,6 +91,16 @@ export default class CustomPresence {
       void this.pollBrowser();
     }
     this.render();
+  }
+
+  /** Run one part of start-up; if Discord changed something, warn once instead of failing the whole plugin. */
+  private safely(what: string, fn: () => void): void {
+    try {
+      fn();
+    } catch (e) {
+      BdApi.Logger.error(PLUGIN, `Failed ${what}`, e);
+      BdApi.UI.showToast(`Custom Presence: failed ${what}. Discord may have updated; see the console.`, { type: "error" });
+    }
   }
 
   private save(): void {
@@ -134,7 +146,7 @@ export default class CustomPresence {
     void this.withImages(desired).then((ready) => {
       if (rev !== this.revision) return; // a newer render started while images were loading
       this.send(ready);
-    });
+    }).catch((e) => BdApi.Logger.error(PLUGIN, "Couldn't update activities", e));
   }
 
   private withImages(desired: DesiredActivity[]): Promise<{ socketId: string; activity: DiscordActivity }[]> {

@@ -6,11 +6,31 @@ import type { TabInfo } from "../core/browser";
 const HEARTBEAT_MS = 5000;
 const MAX_DURATION_S = 12 * 60 * 60; // longer than this is a live stream's buffer, not a video
 
-const text = (selector: string): string | undefined =>
-  document.querySelector(selector)?.textContent?.trim() || undefined;
+/** Visible text only: YouTube keeps hidden alternate titles inside the same heading. */
+const text = (...selectors: string[]): string | undefined => {
+  for (const selector of selectors) {
+    const el = document.querySelector<HTMLElement>(selector);
+    const t = (el?.innerText ?? el?.textContent)?.trim();
+    if (t) return t;
+  }
+  return undefined;
+};
 
-const link = (selector: string): string | undefined =>
-  document.querySelector<HTMLAnchorElement>(selector)?.href || undefined;
+const link = (...selectors: string[]): string | undefined => {
+  for (const selector of selectors) {
+    const href = document.querySelector<HTMLAnchorElement>(selector)?.href;
+    if (href) return href;
+  }
+  return undefined;
+};
+
+const YT_CHANNEL = [
+  "ytd-watch-metadata ytd-channel-name a",
+  "ytd-video-owner-renderer ytd-channel-name a",
+  "#owner #channel-name a",
+  "#upload-info ytd-channel-name a",
+  "ytd-video-owner-renderer a.yt-simple-endpoint[href^='/@']",
+];
 
 const meta = (name: string): string | undefined =>
   document.querySelector<HTMLMetaElement>(`meta[property="${name}"], meta[name="${name}"]`)?.content?.trim() || undefined;
@@ -38,10 +58,10 @@ function read(): TabInfo {
     info.channel = text("ytmusic-player-bar .byline a") ?? navigator.mediaSession?.metadata?.artist;
     info.channelUrl = link("ytmusic-player-bar .byline a");
   } else if (host.endsWith("youtube.com")) {
-    // The media session holds the clean title; the page heading can carry extra text.
-    info.title = navigator.mediaSession?.metadata?.title || text("ytd-watch-metadata h1 yt-formatted-string") || text("h1.title") || document.title;
-    info.channel = text("ytd-watch-metadata ytd-channel-name a") ?? text("#owner #channel-name a") ?? navigator.mediaSession?.metadata?.artist;
-    info.channelUrl = link("ytd-watch-metadata ytd-channel-name a") ?? link("#owner #channel-name a");
+    // The tab title is always just the video title; the page heading can hold hidden alternates.
+    info.title = document.title || text("ytd-watch-metadata h1 yt-formatted-string", "h1.title");
+    info.channel = text(...YT_CHANNEL);
+    info.channelUrl = link(...YT_CHANNEL);
   } else if (host.endsWith("twitch.tv")) {
     info.title = text('[data-a-target="stream-title"]') ?? meta("og:description");
     info.channel = text('[data-a-target="stream-info-card-component"] h1') ?? text("h1.tw-title") ?? text('a[data-a-target="user-channel-header-item"] h1');

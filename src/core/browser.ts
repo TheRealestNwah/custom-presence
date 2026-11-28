@@ -80,7 +80,8 @@ export function parseTab(info: TabInfo): Playback | null {
 
   if (host === "youtube.com" || host === "youtu.be") {
     const id = youtubeVideoId(u);
-    const title = stripSuffix(info.title, /\s*-\s*YouTube$/);
+    // Tab titles look like "(3) Video title - YouTube"; the number is unread notifications.
+    const title = stripSuffix(info.title?.replace(/^\(\d+\+?\)\s*/, ""), /\s*-\s*YouTube$/);
     if (!id || !title) return null;
     return {
       integration: "youtube",

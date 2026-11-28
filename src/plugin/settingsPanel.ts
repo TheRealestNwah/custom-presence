@@ -60,8 +60,8 @@ export const STYLES = `
 .cp-segmented button.is-selected { background: var(--brand-500, var(--brand-experiment, #5865f2)); color: #fff; }
 .cp-linked { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; background: ${FLOATING}; }
 .cp-linked span { flex: 1; }
-.custom-presence-pause { background: none; border: 0; color: var(--interactive-normal, #b5bac1); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; }
-.custom-presence-pause:hover { background: ${HOVER}; color: var(--interactive-hover, #dbdee1); }
+.custom-presence-pause { background: none; border: 0; color: var(--interactive-normal, #b5bac1); width: 24px; height: 24px; margin: 0 8px; padding: 0; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; }
+.custom-presence-pause:hover { color: var(--interactive-hover, #dbdee1); }
 .custom-presence-pause.is-paused { color: var(--status-danger, #da373c); }
 `;
 
@@ -379,7 +379,7 @@ export function SettingsPanel(props: { plugin: PluginLike }) {
     h(
       Group,
       { name: "General" },
-      h(Toggle, { id: "cp-paused", name: "Pause All", note: "Hide everything this plugin shows. Also in the user panel, next to mute.", value: s.paused, onChange: (paused) => update({ paused }) }),
+      h(Toggle, { id: "cp-paused", name: "Pause All", note: "Hide everything this plugin shows. Also in the channel header, next to the pins and member list buttons.", value: s.paused, onChange: (paused) => update({ paused }) }),
       h(Toggle, {
         id: "cp-title-line",
         name: "Title on the profile line",

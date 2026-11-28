@@ -1,8 +1,8 @@
-// The Pause All button in Discord's bottom-left user panel, next to mute and deafen.
-// Discord's class names are hashed ("buttons_a1b2c"), so we match on their stable prefix.
+// The Pause All button in the channel header toolbar, before threads, notifications, pins and members.
+// Discord's class names are hashed ("toolbar_a1b2c"), so we match on their stable prefix.
 
 const BUTTON_ID = "custom-presence-pause";
-const PANEL_BUTTONS = 'section[class*="panels_"] div[class*="container_"] > div[class*="buttons_"]';
+const TOOLBARS = ['section[class*="title_"] div[class*="toolbar_"]', 'div[class*="upperContainer_"] div[class*="toolbar_"]'];
 
 const ICON_ON =
   '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
@@ -17,7 +17,7 @@ export class PauseButton {
 
   inject(): void {
     if (document.getElementById(BUTTON_ID)) return;
-    const container = document.querySelector(PANEL_BUTTONS);
+    const container = TOOLBARS.map((sel) => document.querySelector(sel)).find(Boolean);
     if (!container) return;
     const btn = document.createElement("button");
     btn.id = BUTTON_ID;

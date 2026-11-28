@@ -78,7 +78,7 @@ export default class CustomPresence {
     this.nudge();
   }
 
-  /** BetterDiscord calls this on DOM changes; keeps the Pause All button in the user panel. */
+  /** BetterDiscord calls this on DOM changes; keeps the Pause All button in the channel header. */
   observer(): void {
     this.pauseButton.inject();
   }

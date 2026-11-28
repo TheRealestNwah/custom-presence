@@ -23,7 +23,7 @@ BetterDiscord plugin that shows any program as a Discord activity, plus YouTube,
 - The plugin bundle is CommonJS with a `module.exports = module.exports.default` footer; BetterDiscord needs that and the `/** @name ... */` banner.
 - BetterDiscord has no Node access: no `child_process`/`net`. Use `BdApi.Net.fetch` (no CORS) for HTTP, including localhost.
 - Activities are set with `LOCAL_ACTIVITY_UPDATE` per socket id (`custom-presence:*`). Discord drops an activity with no application id, so it falls back to `"0"` (or `customAppId`); a URL becomes an asset via `fetchAssetIds`, which works with `"0"` too. `details_url`, `state_url` and `assets.large_url` make the lines and image clickable.
-- Discord internals (store names, the user panel selector in `pauseButton.ts`, `fetchAssetIds`) can change with Discord updates. When something breaks after an update, look there first.
+- Discord internals (store names, the header toolbar selector in `pauseButton.ts`, `fetchAssetIds`) can change with Discord updates. When something breaks after an update, look there first.
 - Program detection uses Discord's Registered Games (`RunningGameStore`), not process scanning.
 - The extension id `custom-presence@therealestnwah` must match `allowed_extensions` in `install.ps1`, and the host name `custom_presence_helper` must match in `background.ts` and `install.ps1`.
 - Don't run `install.ps1` from the Claude desktop app's shell, even with the sandbox off. The app is a packaged (MSIX) app, so its writes to HKCU and `%LOCALAPPDATA%` go to a private copy that Waterfox can't see: Waterfox then reports "No such native application". Ask the user to run it from their own PowerShell window.

@@ -17,6 +17,19 @@ interface BdStore {
 
 declare const BdApi: {
   React: any;
+  /** BetterDiscord's own settings components; they follow Discord's theme. onChange gets the value, not the event. */
+  Components: {
+    SettingItem: any;
+    SettingGroup: any;
+    SwitchInput: any;
+    TextInput: any;
+    DropdownInput: any;
+    Button: any & {
+      Colors: Record<"BRAND" | "BLURPLE" | "RED" | "GREEN" | "YELLOW" | "PRIMARY" | "LINK" | "WHITE" | "TRANSPARENT", string>;
+      Looks: Record<"FILLED" | "OUTLINED" | "LINK" | "BLANK", string>;
+      Sizes: Record<"NONE" | "TINY" | "SMALL" | "MEDIUM" | "LARGE" | "ICON", string>;
+    };
+  };
   Data: {
     load(pluginName: string, key: string): any;
     save(pluginName: string, key: string, value: unknown): void;

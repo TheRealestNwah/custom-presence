@@ -24,12 +24,25 @@ const link = (...selectors: string[]): string | undefined => {
   return undefined;
 };
 
-const YT_CHANNEL = [
+// Links first; videos with several uploaders show the names as plain text ("A and B") instead.
+const YT_CHANNEL_LINKS = [
   "ytd-watch-metadata ytd-channel-name a",
   "ytd-video-owner-renderer ytd-channel-name a",
   "#owner #channel-name a",
   "#upload-info ytd-channel-name a",
-  "ytd-video-owner-renderer a.yt-simple-endpoint[href^='/@']",
+];
+const YT_CHANNEL_TEXT = [
+  ...YT_CHANNEL_LINKS,
+  "ytd-watch-metadata ytd-channel-name #text",
+  "ytd-watch-metadata ytd-channel-name yt-formatted-string",
+  "#owner #channel-name",
+];
+// For several uploaders, the first avatar or channel link is the main channel.
+const YT_CHANNEL_HREF = [
+  ...YT_CHANNEL_LINKS,
+  "ytd-watch-metadata #owner a[href^='/@']",
+  "ytd-watch-metadata #owner a[href^='/channel/']",
+  "#owner a[href^='/@']",
 ];
 
 const meta = (name: string): string | undefined =>
@@ -60,8 +73,8 @@ function read(): TabInfo {
   } else if (host.endsWith("youtube.com")) {
     // The tab title is always just the video title; the page heading can hold hidden alternates.
     info.title = document.title || text("ytd-watch-metadata h1 yt-formatted-string", "h1.title");
-    info.channel = text(...YT_CHANNEL);
-    info.channelUrl = link(...YT_CHANNEL);
+    info.channel = text(...YT_CHANNEL_TEXT)?.split("\n")[0]?.trim() || undefined;
+    info.channelUrl = link(...YT_CHANNEL_HREF);
   } else if (host.endsWith("twitch.tv")) {
     info.title = text('[data-a-target="stream-title"]') ?? meta("og:description");
     info.channel = text('[data-a-target="stream-info-card-component"] h1') ?? text("h1.tw-title") ?? text('a[data-a-target="user-channel-header-item"] h1');

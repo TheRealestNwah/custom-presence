@@ -1,6 +1,6 @@
 {
   "name": "custom-presence",
-  "version": "0.2.0-alpha",
+  "version": "0.3.0-alpha",
   "private": true,
   "description": "BetterDiscord plugin that shows any program as a game, plus YouTube, Twitch, Plex and Plexamp presence",
   "license": "MIT",

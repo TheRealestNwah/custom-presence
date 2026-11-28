@@ -35,6 +35,12 @@ export interface ComputeInput {
   now: number;
 }
 
+/**
+ * Discord drops a local activity that has no application id, so fall back to "0" like other
+ * Rich Presence tools do. Images still need a real id (customAppId).
+ */
+const appId = (settings: Settings) => settings.customAppId || "0";
+
 const normExe = (exe: string) => exe.trim().toLowerCase().split(/[\\/]/).pop() ?? "";
 
 /** Mappings whose Program is running right now. */
@@ -61,7 +67,7 @@ export function mappingActivity(mapping: Mapping, settings: Settings, start: num
   const activity: DiscordActivity = clean({
     name: mapping.knownGame?.name ?? (mapping.name.trim() || mapping.exeName),
     type,
-    application_id: mapping.knownGame?.id ?? (settings.customAppId || undefined),
+    application_id: mapping.knownGame?.id ?? appId(settings),
     details: mapping.details?.trim(),
     state: mapping.state?.trim(),
     url: type === ActivityType.Streaming ? mapping.streamUrl : undefined,
@@ -83,7 +89,7 @@ const pad = (n: number) => String(n);
 
 /** Build the Activity an Integration shows for one Playback. */
 export function playbackActivity(p: Playback, settings: Settings, start: number): DesiredActivity {
-  const base = { timestamps: { start }, application_id: settings.customAppId || undefined };
+  const base = { timestamps: { start }, application_id: appId(settings) };
   let activity: DiscordActivity;
   switch (p.integration) {
     case "youtube":

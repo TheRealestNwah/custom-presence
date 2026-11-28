@@ -78,6 +78,8 @@ function read(): TabInfo {
     info.title = text("ytmusic-player-bar .title") ?? navigator.mediaSession?.metadata?.title;
     info.channel = text("ytmusic-player-bar .byline a") ?? navigator.mediaSession?.metadata?.artist;
     info.channelUrl = link("ytmusic-player-bar .byline a");
+    // The music keeps playing while you browse Explore, Library and so on, where the URL has no song in it.
+    info.playerUrl = link("#movie_player a.ytp-title-link", "a.ytp-title-link");
   } else if (host.endsWith("youtube.com")) {
     // The tab title is always just the video title; the page heading can hold hidden alternates.
     info.title = document.title || text("ytd-watch-metadata h1 yt-formatted-string", "h1.title");

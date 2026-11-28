@@ -27,6 +27,10 @@ describe("parseTab", () => {
     expect(parseTab({ ...base, channelUrl: "javascript:alert(1)" })?.subtitleUrl).toBeUndefined();
   });
 
+  it("strips the notification count and suffix from a YouTube tab title", () => {
+    expect(parseTab({ url: "https://www.youtube.com/watch?v=abc", playing: true, title: "(12) New Studio Tour - YouTube" })?.title).toBe("New Studio Tour");
+  });
+
   it("passes progress through only when it makes sense", () => {
     const base = { url: "https://www.youtube.com/watch?v=abc", playing: true, title: "Video" };
     expect(parseTab({ ...base, startedAt: 5000, durationMs: 60000 })).toMatchObject({ startedAt: 5000, durationMs: 60000 });

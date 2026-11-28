@@ -54,6 +54,10 @@ export const STYLES = `
 }
 .cp-suggest-list button:hover, .cp-suggest-list button:focus { background: ${HOVER}; outline: none; }
 .cp-suggest-list button span:last-child { color: ${MUTED}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cp-segmented { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 8px; background: ${FLOATING}; border: 1px solid ${BORDER}; }
+.cp-segmented button { flex: 1; min-width: 90px; padding: 8px 10px; border: 0; border-radius: 6px; background: none; color: ${MUTED}; font-size: 14px; font-weight: 500; cursor: pointer; }
+.cp-segmented button:hover { background: ${HOVER}; color: ${TEXT}; }
+.cp-segmented button.is-selected { background: var(--brand-500, var(--brand-experiment, #5865f2)); color: #fff; }
 .cp-linked { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; background: ${FLOATING}; }
 .cp-linked span { flex: 1; }
 .custom-presence-pause { background: none; border: 0; color: var(--interactive-normal, #b5bac1); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; }
@@ -216,7 +220,17 @@ function MappingCard(props: { mapping: Mapping; games: RunningGame[]; open: bool
         h(Field, {
           id: id("type"),
           name: "Activity type",
-          children: h(C.DropdownInput, { value: m.type, options: TYPE_OPTIONS, onChange: (type: ActivityTypeName) => set({ type }) }),
+          children: h(
+            "div",
+            { className: "cp-segmented", role: "radiogroup" },
+            TYPE_OPTIONS.map((o) =>
+              h(
+                "button",
+                { key: o.value, type: "button", role: "radio", "aria-checked": m.type === o.value, className: m.type === o.value ? "is-selected" : "", onClick: () => set({ type: o.value }) },
+                o.label,
+              ),
+            ),
+          ),
         }),
         h(KnownGamePicker, { value: m.knownGame, onChange: (knownGame) => set({ knownGame }) }),
         !m.knownGame &&

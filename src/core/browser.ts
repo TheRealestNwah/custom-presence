@@ -12,6 +12,17 @@ export interface TabInfo {
   channelUrl?: string;
   /** Twitch category / game. */
   category?: string;
+  /** Epoch ms when the video would have started if played straight through, rounded to the second. */
+  startedAt?: number;
+  /** Video length in ms, rounded to the second. Absent for live streams and ads. */
+  durationMs?: number;
+}
+
+/** Progress fields copied onto a Playback, only when both make sense. */
+function timing(info: TabInfo): Pick<Playback, "startedAt" | "durationMs"> {
+  const { startedAt, durationMs } = info;
+  if (typeof startedAt !== "number" || typeof durationMs !== "number" || !(durationMs > 0) || !Number.isFinite(startedAt)) return {};
+  return { startedAt, durationMs };
 }
 
 const TWITCH_RESERVED = new Set([
@@ -63,6 +74,7 @@ export function parseTab(info: TabInfo): Playback | null {
       subtitleUrl: sameSiteLink(info.channelUrl, ["music.youtube.com"]),
       url: `https://music.youtube.com/watch?v=${id}`,
       imageUrl: ytThumb(id),
+      ...timing(info),
     };
   }
 
@@ -79,6 +91,7 @@ export function parseTab(info: TabInfo): Playback | null {
       subtitleUrl: sameSiteLink(info.channelUrl, ["www.youtube.com", "youtube.com", "m.youtube.com"]),
       url: `https://www.youtube.com/watch?v=${id}`,
       imageUrl: ytThumb(id),
+      ...timing(info),
     };
   }
 
@@ -94,6 +107,7 @@ export function parseTab(info: TabInfo): Playback | null {
         subtitle: info.channel,
         extra: info.category,
         url: `https://www.twitch.tv/videos/${parts[1]}`,
+        ...timing(info),
       };
     }
     if (TWITCH_RESERVED.has(first) || !/^\w+$/.test(first)) return null;

@@ -2,6 +2,8 @@ import { ActivityClock, activeMappings, computeActivities, filterDiscordActiviti
 import { normalizeSettings, type Settings } from "../core/settings";
 import type { DesiredActivity, DiscordActivity, Playback } from "../core/types";
 import {
+  connectedAccountsStore,
+  getLinkedYouTubeChannel,
   getRunningGames,
   localActivityStore,
   onConnectionOpen,
@@ -43,6 +45,9 @@ export default class CustomPresence {
     const onGames = () => this.render();
     games?.addChangeListener(onGames);
     this.cleanups.push(() => games?.removeChangeListener(onGames));
+    const accounts = connectedAccountsStore();
+    accounts?.addChangeListener(onGames);
+    this.cleanups.push(() => accounts?.removeChangeListener(onGames));
     // Discord forgets local activities when it reconnects, so send everything again.
     this.safely("listening for reconnects", () =>
       this.cleanups.push(onConnectionOpen(() => {
@@ -140,7 +145,7 @@ export default class CustomPresence {
   render(): void {
     const rev = ++this.revision;
     const desired = computeActivities(
-      { settings: this.settings, runningGames: getRunningGames(), playbacks: [...this.browser, ...this.plex], now: Date.now() },
+      { settings: this.settings, runningGames: getRunningGames(), playbacks: [...this.browser, ...this.plex], now: Date.now(), youtubeChannel: getLinkedYouTubeChannel() },
       this.clock,
     );
     void this.withImages(desired).then((ready) => {

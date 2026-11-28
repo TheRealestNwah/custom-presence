@@ -35,6 +35,10 @@ _Avoid_: Detectable app, official game
 A built-in source that turns something the user is consuming into an Activity: YouTube, YouTube Music, Twitch, Plex, Plexamp or Spotify. Each one can be switched on or off. Browser Integrations ignore private windows.
 _Avoid_: Platform, provider, connector
 
+**Own Channel**:
+The user's own YouTube channel, as linked in their Discord Connections. When switched on, the YouTube Integration shows it instead of the video being watched.
+_Avoid_: My channel, linked account
+
 **This PC**:
 The one computer whose playback counts. Plex or Plexamp playing on any other device (TV, phone) is ignored.
 

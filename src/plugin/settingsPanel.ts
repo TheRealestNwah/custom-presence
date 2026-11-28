@@ -5,7 +5,7 @@ import { searchKnownGames } from "../core/knownGames";
 import type { PlexDevice } from "../core/plex";
 import type { Settings } from "../core/settings";
 import { ActivityType, type ActivityTypeName, type IntegrationId, type KnownGameRef, type Mapping, type RunningGame } from "../core/types";
-import { getGamesSeen, loadKnownGames, openExternal } from "./discord";
+import { getGamesSeen, getLinkedYouTubeChannel, loadKnownGames, openExternal } from "./discord";
 import { helperStatus } from "./helperClient";
 import { findServerUri, listResources, seenPlayers, startPlexSignIn, waitForPlexToken } from "./plexClient";
 
@@ -365,6 +365,7 @@ export function SettingsPanel(props: { plugin: PluginLike }) {
   };
   const setMappings = (mappings: Mapping[]) => update({ mappings });
   const games = React.useMemo(() => getGamesSeen(), []);
+  const ytChannel = getLinkedYouTubeChannel();
 
   const addMapping = () => {
     const id = crypto.randomUUID();
@@ -399,6 +400,16 @@ export function SettingsPanel(props: { plugin: PluginLike }) {
       INTEGRATIONS.map((i) =>
         h(Toggle, { key: i.id, id: `cp-int-${i.id}`, name: i.label, note: i.note, value: s.integrations[i.id], onChange: (on) => update({ integrations: { ...s.integrations, [i.id]: on } }) }),
       ),
+      s.integrations.youtube &&
+        h(Toggle, {
+          id: "cp-yt-own-channel",
+          name: "YouTube: show my channel",
+          note: ytChannel
+            ? `Show "Watching YouTube" with your channel (${ytChannel.name}) instead of the video you're watching.`
+            : "Show \"Watching YouTube\" with your channel instead of the video. Link YouTube in User Settings → Connections first.",
+          value: s.youtubeOwnChannel,
+          onChange: (youtubeOwnChannel) => update({ youtubeOwnChannel }),
+        }),
       h(
         "div",
         { className: "cp-muted" },

@@ -27,6 +27,13 @@ describe("parseTab", () => {
     expect(parseTab({ ...base, channelUrl: "javascript:alert(1)" })?.subtitleUrl).toBeUndefined();
   });
 
+  it("passes progress through only when it makes sense", () => {
+    const base = { url: "https://www.youtube.com/watch?v=abc", playing: true, title: "Video" };
+    expect(parseTab({ ...base, startedAt: 5000, durationMs: 60000 })).toMatchObject({ startedAt: 5000, durationMs: 60000 });
+    expect(parseTab({ ...base, startedAt: 5000 })).not.toHaveProperty("startedAt");
+    expect(parseTab({ ...base, startedAt: 5000, durationMs: 0 })).not.toHaveProperty("durationMs");
+  });
+
   it("treats music.youtube.com as YouTube Music", () => {
     expect(parseTab({ url: "https://music.youtube.com/watch?v=xyz", playing: false, title: "Track", channel: "Band" })).toMatchObject({
       integration: "youtubeMusic",

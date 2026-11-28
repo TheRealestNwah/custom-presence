@@ -4,6 +4,7 @@
 import type { TabInfo } from "../core/browser";
 
 const HEARTBEAT_MS = 5000;
+const MAX_DURATION_S = 12 * 60 * 60; // longer than this is a live stream's buffer, not a video
 
 const text = (selector: string): string | undefined =>
   document.querySelector(selector)?.textContent?.trim() || undefined;
@@ -25,6 +26,12 @@ function read(): TabInfo {
   const video = mainVideo();
   const playing = !!video && !video.paused && !video.ended && video.readyState > 2;
   const info: TabInfo = { url: location.href, playing };
+  const ad = !!document.querySelector(".ad-showing, .ad-interrupting");
+  if (video && !ad && Number.isFinite(video.duration) && video.duration > 0 && video.duration < MAX_DURATION_S) {
+    // Rounded to the second so the heartbeat doesn't count as a change.
+    info.startedAt = Math.round((Date.now() - video.currentTime * 1000) / 1000) * 1000;
+    info.durationMs = Math.round(video.duration) * 1000;
+  }
 
   if (host === "music.youtube.com") {
     info.title = text("ytmusic-player-bar .title") ?? navigator.mediaSession?.metadata?.title;
@@ -52,7 +59,7 @@ function report(force = false): void {
   browser.runtime.sendMessage({ type: "tab", info }).catch(() => undefined);
 }
 
-for (const ev of ["play", "playing", "pause", "ended", "loadedmetadata"]) {
+for (const ev of ["play", "playing", "pause", "ended", "loadedmetadata", "seeked", "ratechange"]) {
   document.addEventListener(ev, () => report(), true);
 }
 new MutationObserver(() => report()).observe(document.querySelector("title") ?? document.head, {

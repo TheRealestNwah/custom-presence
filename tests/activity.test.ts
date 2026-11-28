@@ -134,7 +134,11 @@ describe("playbackActivity layouts", () => {
     const a = playbackActivity({ ...yt, subtitle: undefined, url: undefined }, s, 0).activity;
     expect("state" in a).toBe(false);
     expect("buttons" in a).toBe(false);
-    expect("application_id" in a).toBe(false);
+  });
+
+  it("falls back to application id 0 so Discord keeps the activity", () => {
+    expect(playbackActivity(yt, s, 0).activity.application_id).toBe("0");
+    expect(playbackActivity(yt, settings({ customAppId: "999" }), 0).activity.application_id).toBe("999");
   });
 });
 

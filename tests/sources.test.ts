@@ -1,8 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { parseTab } from "../src/core/browser";
+import { parseTab, parseUptime } from "../src/core/browser";
 import { searchKnownGames } from "../src/core/knownGames";
 import { encodeFrame, FrameDecoder } from "../src/core/nativeMessaging";
 import { artworkGuid, guidId, parseResources, parseSessions, providerThumb, serverUris } from "../src/core/plex";
+
+describe("parseUptime", () => {
+  it("reads Twitch's uptime counter", () => {
+    expect(parseUptime("9:33:00")).toBe((9 * 3600 + 33 * 60) * 1000);
+    expect(parseUptime(" 12:05 ")).toBe((12 * 60 + 5) * 1000);
+    expect(parseUptime("125:00:01")).toBe((125 * 3600 + 1) * 1000);
+  });
+
+  it("rejects anything else", () => {
+    for (const t of [undefined, "", "LIVE", "9:3", "1:2:3:4", "9:33:00 since live stream started"]) expect(parseUptime(t)).toBeUndefined();
+  });
+});
 
 describe("parseTab", () => {
   it("reads a YouTube watch page and strips the ' - YouTube' suffix", () => {
@@ -58,6 +70,15 @@ describe("parseTab", () => {
       extra: "Celeste",
       url: "https://www.twitch.tv/somestreamer",
     });
+  });
+
+  it("keeps when a Twitch stream went live, if plausible", () => {
+    const now = 1_000_000_000_000;
+    const tab = { url: "https://www.twitch.tv/foo", playing: true };
+    expect(parseTab({ ...tab, startedAt: now - 3_600_000 }, now)?.startedAt).toBe(now - 3_600_000);
+    expect(parseTab({ ...tab, startedAt: now + 3_600_000 }, now)?.startedAt).toBeUndefined();
+    expect(parseTab({ ...tab, startedAt: now - 30 * 24 * 3_600_000 }, now)?.startedAt).toBeUndefined();
+    expect(parseTab(tab, now)?.startedAt).toBeUndefined();
   });
 
   it("ignores Twitch's own pages", () => {

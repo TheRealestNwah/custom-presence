@@ -112,6 +112,16 @@ describe("playbackActivity layouts", () => {
     expect(a).toMatchObject({ name: "Twitch", details: "Foo", state: "Minecraft", buttons: ["Watch stream"] });
   });
 
+  it("Twitch: counts up from when the stream went live, not from when you opened it", () => {
+    const clock = new ActivityClock();
+    const stream: Playback = { integration: "twitch", key: "foo", playing: true, title: "t", startedAt: 5000 };
+    const run = (startedAt?: number) =>
+      computeActivities({ settings: s, runningGames: [], playbacks: [{ ...stream, startedAt }], now: 90000 }, clock)[0]!.activity.timestamps;
+    expect(run(5000)).toEqual({ start: 5000 });
+    expect(run(6000)).toEqual({ start: 5000 });
+    expect(run(undefined)).toEqual({ start: 90000 });
+  });
+
   it("Plex episode: show name and S2E5 · title", () => {
     const a = playbackActivity({ integration: "plex", key: "1", playing: true, title: "Ozymandias", showTitle: "Breaking Bad", season: 5, episode: 14 }, s, 0).activity;
     expect(a).toMatchObject({ name: "Breaking Bad", type: ActivityType.Watching, details: "S5E14 · Ozymandias" });

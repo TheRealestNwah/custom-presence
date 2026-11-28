@@ -79,7 +79,10 @@ export interface Playback {
   extra?: string;
   url?: string;
   imageUrl?: string;
-  /** When playback would have started had it run without pausing or seeking (epoch ms). With durationMs, shows a progress bar. */
+  /**
+   * When playback would have started had it run without pausing or seeking (epoch ms). With durationMs, shows a progress bar;
+   * without it (a Twitch live stream), it's when the stream went live and the activity counts up from there.
+   */
   startedAt?: number;
   /** Length of the item, if it has one (live streams don't). */
   durationMs?: number;

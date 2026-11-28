@@ -9,7 +9,7 @@ function headers(clientId: string, token?: string): Record<string, string> {
     Accept: "application/json",
     "X-Plex-Client-Identifier": clientId,
     "X-Plex-Product": PRODUCT,
-    "X-Plex-Version": "0.1.0",
+    "X-Plex-Version": __VERSION__,
     "X-Plex-Platform": "Windows",
   };
   if (token) h["X-Plex-Token"] = token;

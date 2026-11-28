@@ -15,6 +15,9 @@ interface BdStore {
   [method: string]: any;
 }
 
+/** The package version, filled in by the build. */
+declare const __VERSION__: string;
+
 declare const BdApi: {
   React: any;
   /** BetterDiscord's own settings components; they follow Discord's theme. onChange gets the value, not the event. */

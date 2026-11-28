@@ -5,8 +5,9 @@ BetterDiscord plugin that shows any program as a Discord activity, plus YouTube,
 ## Commands
 
 - `npm ci`: install
-- `npm run check`: typecheck + lint + tests (what CI runs, plus `npm run build`)
+- `npm run check`: typecheck + lint + tests (what CI runs, plus `npm run package`)
 - `npm run build`: writes `dist/CustomPresence.plugin.js`, `dist/extension/`, `dist/helper/`
+- `npm run package`: build, then `dist/custom-presence.xpi` and `dist/CustomPresence-<version>.zip` (plugin, xpi, `helper/`, and `install.txt` filled in from `scripts/install.txt`). The zip is the one release asset.
 - `npm test`: vitest, tests live in `tests/`
 
 ## Layout

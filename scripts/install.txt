@@ -1,0 +1,45 @@
+Custom Presence {{version}} - install
+=====================================
+
+Windows only. Using BetterDiscord is against Discord's Terms of Service; use it at your own risk.
+
+What's in this zip
+------------------
+  CustomPresence.plugin.js   the BetterDiscord plugin
+  custom-presence.xpi        the Waterfox extension (for YouTube, YouTube Music, Twitch)
+  helper\                    the browser helper the extension talks to
+  install.txt                this file
+
+1. The plugin (needed for everything)
+-------------------------------------
+  1. Discord must have BetterDiscord installed (https://betterdiscord.app).
+  2. In Discord: User Settings > Plugins > Open Plugins Folder.
+  3. Copy CustomPresence.plugin.js into that folder.
+  4. Turn on CustomPresence in the plugin list and open its settings.
+
+  Programs as games, Plex, Plexamp and the Spotify switch only need this step.
+
+2. YouTube, YouTube Music and Twitch (Waterfox)
+-----------------------------------------------
+  a) Install the helper (once). Needs Node.js 20 or newer (https://nodejs.org).
+     Open PowerShell in the helper folder from this zip and run:
+
+       powershell -ExecutionPolicy Bypass -File install.ps1
+
+     It copies the helper to %LOCALAPPDATA%\CustomPresence and registers it with Waterfox.
+     To remove it later, run the same command with -Uninstall at the end.
+
+  b) Install the extension. It isn't signed by Mozilla, so first:
+       - open about:config in Waterfox
+       - set xpinstall.signatures.required to false
+     Then open the add-ons page (Ctrl+Shift+A) and drag custom-presence.xpi onto it. Click Add.
+
+  c) Restart Waterfox and open a YouTube or Twitch tab. The plugin settings should say
+     "Browser helper: connected".
+
+3. Plex and Plexamp
+-------------------
+  In the plugin settings click "Sign in with Plex" and approve it in the browser.
+  Play something on this PC, then tick that player under "This PC".
+
+More help and troubleshooting: https://github.com/TheRealestNwah/custom-presence#readme

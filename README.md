@@ -100,6 +100,7 @@ The browser part has two pieces: a small Waterfox extension that reads what your
 npm ci
 npm run check   # typecheck, lint, tests
 npm run build
+npm run package # the release zip, in dist
 ```
 
 See [CLAUDE.md](CLAUDE.md) for the layout, and [docs/design.md](docs/design.md) for the design. Not affiliated with Discord, Plex, Google or Twitch.

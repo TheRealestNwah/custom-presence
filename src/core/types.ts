@@ -95,6 +95,8 @@ export interface Playback {
 export interface LinkedChannel {
   name: string;
   url: string;
+  /** The channel's avatar, when known. */
+  imageUrl?: string;
 }
 
 /** A program Discord's game detection currently sees running. */

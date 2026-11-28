@@ -157,11 +157,16 @@ export default class CustomPresence {
     }
   }
 
+  /** Only looked up (and its page fetched) while Own Channel mode is on. */
+  private youtubeChannel() {
+    return this.settings.youtubeOwnChannel && this.settings.integrations.youtube ? getLinkedYouTubeChannel(() => this.render()) : undefined;
+  }
+
   /** Recompute what should show and send only what changed. */
   render(): void {
     const rev = ++this.revision;
     const desired = computeActivities(
-      { settings: this.settings, runningGames: getRunningGames(), playbacks: [...this.browser, ...this.plex], now: Date.now(), youtubeChannel: getLinkedYouTubeChannel() },
+      { settings: this.settings, runningGames: getRunningGames(), playbacks: [...this.browser, ...this.plex], now: Date.now(), youtubeChannel: this.youtubeChannel() },
       this.clock,
     );
     void this.withImages(desired).then((ready) => {

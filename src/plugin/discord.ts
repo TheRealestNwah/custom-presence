@@ -1,6 +1,7 @@
 // Everything that touches Discord's internals lives here, so breakage after a Discord update is in one place.
 import type { DiscordActivity, LinkedChannel, RunningGame } from "../core/types";
 import type { DetectableApp } from "../core/knownGames";
+import { parseChannelPage, type ChannelProfile } from "../core/youtubeChannel";
 
 export const PLUGIN = "CustomPresence";
 
@@ -69,12 +70,42 @@ export function getGamesSeen(): RunningGame[] {
 
 export const connectedAccountsStore = () => BdApi.Webpack.getStore("ConnectedAccountsStore");
 
-/** The YouTube channel linked in the user's Discord Connections, if any. */
-export function getLinkedYouTubeChannel(): LinkedChannel | undefined {
+const PROFILE_TTL_MS = 6 * 60 * 60 * 1000;
+const profiles = new Map<string, { profile: ChannelProfile; at: number }>();
+const loading = new Set<string>();
+
+/** Fetch the channel page for its current name and avatar; calls onLoaded once it has them. */
+function loadChannelProfile(url: string, onLoaded: () => void): void {
+  const cached = profiles.get(url);
+  if (loading.has(url) || (cached && Date.now() - cached.at < PROFILE_TTL_MS)) return;
+  loading.add(url);
+  void BdApi.Net.fetch(url, { headers: { "Accept-Language": "en" } })
+    .then(async (res) => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      profiles.set(url, { profile: parseChannelPage(await res.text()), at: Date.now() });
+      onLoaded();
+    })
+    .catch((e) => {
+      // Keep whatever we had; try again after the TTL.
+      profiles.set(url, { profile: cached?.profile ?? {}, at: Date.now() });
+      BdApi.Logger.warn(PLUGIN, "Couldn't read the YouTube channel page", e);
+    })
+    .finally(() => loading.delete(url));
+}
+
+/**
+ * The YouTube channel linked in the user's Discord Connections, if any. Its name and avatar come from
+ * the channel page once loaded (Discord keeps the name from when the account was linked); onLoaded
+ * fires when they arrive so the caller can redraw.
+ */
+export function getLinkedYouTubeChannel(onLoaded: () => void = () => {}): LinkedChannel | undefined {
   const accounts = (connectedAccountsStore()?.getAccounts?.() ?? []) as { type?: string; id?: string; name?: string }[];
   const yt = accounts.find((a) => a.type === "youtube" && a.id);
   if (!yt?.id) return undefined;
-  return { name: yt.name || "My channel", url: `https://www.youtube.com/channel/${encodeURIComponent(yt.id)}` };
+  const url = `https://www.youtube.com/channel/${encodeURIComponent(yt.id)}`;
+  loadChannelProfile(url, onLoaded);
+  const profile = profiles.get(url)?.profile ?? {};
+  return { name: profile.name || yt.name || "My channel", url, imageUrl: profile.imageUrl };
 }
 
 interface AssetUtils {

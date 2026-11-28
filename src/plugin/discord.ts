@@ -88,10 +88,10 @@ const assetCache = new Map<string, string>();
 
 /**
  * Turn a public image URL into an asset key Discord can render ("mp:external/...").
- * Needs a real application id; returns undefined when it can't.
+ * Works with the placeholder application id "0" too.
  */
 export async function resolveImage(applicationId: string | undefined, url: string): Promise<string | undefined> {
-  if (!applicationId || applicationId === "0") return undefined;
+  if (!applicationId) return undefined;
   const cacheKey = `${applicationId}|${url}`;
   const cached = assetCache.get(cacheKey);
   if (cached) return cached;

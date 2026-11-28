@@ -8,6 +8,8 @@ export interface TabInfo {
   title?: string;
   /** Channel, artist or streamer display name. */
   channel?: string;
+  /** Link to the channel or artist page, as found on the page. */
+  channelUrl?: string;
   /** Twitch category / game. */
   category?: string;
 }
@@ -24,6 +26,17 @@ function youtubeVideoId(u: URL): string | undefined {
   if (u.pathname === "/watch") return u.searchParams.get("v") ?? undefined;
   const m = /^\/(?:shorts|live|embed)\/([\w-]+)/.exec(u.pathname);
   return m?.[1];
+}
+
+/** Keep a page-supplied link only if it points at the same site, so the activity never links elsewhere. */
+function sameSiteLink(href: string | undefined, hosts: string[]): string | undefined {
+  if (!href) return undefined;
+  try {
+    const u = new URL(href);
+    return u.protocol === "https:" && hosts.includes(u.hostname) ? u.href : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 const stripSuffix = (title: string | undefined, suffix: RegExp) => title?.replace(suffix, "").trim() || undefined;
@@ -47,6 +60,7 @@ export function parseTab(info: TabInfo): Playback | null {
       playing: info.playing,
       title: info.title,
       subtitle: info.channel,
+      subtitleUrl: sameSiteLink(info.channelUrl, ["music.youtube.com"]),
       url: `https://music.youtube.com/watch?v=${id}`,
       imageUrl: ytThumb(id),
     };
@@ -62,6 +76,7 @@ export function parseTab(info: TabInfo): Playback | null {
       playing: info.playing,
       title,
       subtitle: info.channel,
+      subtitleUrl: sameSiteLink(info.channelUrl, ["www.youtube.com", "youtube.com", "m.youtube.com"]),
       url: `https://www.youtube.com/watch?v=${id}`,
       imageUrl: ytThumb(id),
     };

@@ -8,6 +8,9 @@ const HEARTBEAT_MS = 5000;
 const text = (selector: string): string | undefined =>
   document.querySelector(selector)?.textContent?.trim() || undefined;
 
+const link = (selector: string): string | undefined =>
+  document.querySelector<HTMLAnchorElement>(selector)?.href || undefined;
+
 const meta = (name: string): string | undefined =>
   document.querySelector<HTMLMetaElement>(`meta[property="${name}"], meta[name="${name}"]`)?.content?.trim() || undefined;
 
@@ -26,9 +29,12 @@ function read(): TabInfo {
   if (host === "music.youtube.com") {
     info.title = text("ytmusic-player-bar .title") ?? navigator.mediaSession?.metadata?.title;
     info.channel = text("ytmusic-player-bar .byline a") ?? navigator.mediaSession?.metadata?.artist;
+    info.channelUrl = link("ytmusic-player-bar .byline a");
   } else if (host.endsWith("youtube.com")) {
-    info.title = text("ytd-watch-metadata h1") ?? text("h1.title") ?? document.title;
-    info.channel = text("ytd-watch-metadata ytd-channel-name a") ?? text("#owner #channel-name a");
+    // The media session holds the clean title; the page heading can carry extra text.
+    info.title = navigator.mediaSession?.metadata?.title || text("ytd-watch-metadata h1 yt-formatted-string") || text("h1.title") || document.title;
+    info.channel = text("ytd-watch-metadata ytd-channel-name a") ?? text("#owner #channel-name a") ?? navigator.mediaSession?.metadata?.artist;
+    info.channelUrl = link("ytd-watch-metadata ytd-channel-name a") ?? link("#owner #channel-name a");
   } else if (host.endsWith("twitch.tv")) {
     info.title = text('[data-a-target="stream-title"]') ?? meta("og:description");
     info.channel = text('[data-a-target="stream-info-card-component"] h1') ?? text("h1.tw-title") ?? text('a[data-a-target="user-channel-header-item"] h1');

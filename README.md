@@ -34,6 +34,8 @@ Several activities can show at once. Paused videos and songs disappear straight 
 
 ## Build
 
+Or skip building: the [latest release](https://github.com/TheRealestNwah/custom-presence/releases/latest) has the plugin, the extension (`custom-presence.xpi`) and the helper (`helper.zip`, unzip it and run `install.ps1` from inside).
+
 ```powershell
 git clone https://github.com/TheRealestNwah/custom-presence.git
 cd custom-presence

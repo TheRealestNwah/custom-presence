@@ -28,6 +28,7 @@ await Promise.all([
     format: "cjs",
     platform: "browser",
     banner: { js: banner },
+    define: { __VERSION__: JSON.stringify(pkg.version) },
     footer: { js: "module.exports = module.exports.default;" },
   }),
   build({
